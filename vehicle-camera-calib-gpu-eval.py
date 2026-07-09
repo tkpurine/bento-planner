@@ -98,6 +98,17 @@ def main():
     sh([sys.executable, "scripts/cost_slice_diagnostic.py",
         "nuscenes/mini", "nuscenes/can_bus/can_bus", "--splg"])
 
+    # candidate-4 was only verified on scene-0061; re-check with SPLG
+    # specifically on the two scenes that dominate the pooling failures
+    # (scene-0103, scene-0916) before trusting that their low ground-point
+    # fraction is a real scene property rather than a KLT tracking artifact
+    # (see docs/next_phase_plan.md A5).
+    print("\n" + "=" * 70)
+    print("Bad-scene diagnosis with SPLG (does the ground-fraction finding survive?)")
+    print("=" * 70, flush=True)
+    sh([sys.executable, "scripts/diagnose_bad_scenes.py",
+        "nuscenes/mini", "nuscenes/can_bus/can_bus", "--splg"])
+
     print("\n" + "=" * 70)
     print("KLT vs SuperPoint+LightGlue tracker comparison (default + wide-FOV rigs)")
     print("=" * 70, flush=True)
