@@ -98,6 +98,21 @@ def main():
     sh([sys.executable, "scripts/cost_slice_diagnostic.py",
         "nuscenes/mini", "nuscenes/can_bus/can_bus", "--splg"])
 
+    # 2026-07-15 reorder: this step has never completed (two runs in a row
+    # got allocated a Tesla P100 instead of the requested T4 -- see
+    # calib/tracking/splg.py's CPU-fallback warning in the kernel log --
+    # and SPLG on CPU is ~35x slower than on GPU, e.g. compare_trackers'
+    # temporal-tracking SPLG pass alone took 592s on CPU vs 16.6s on T4),
+    # so it now runs right after the cheap cost-slice check instead of
+    # after diagnose_bad_scenes/compare_trackers (both already confirmed
+    # twice and no longer the marginal-value item). If this run also gets
+    # a P100, at least this gets first crack at whatever CPU time is
+    # available before a timeout/cancellation.
+    print("\n" + "=" * 70)
+    print("Constraint C (handeye) VO source: KLT vs SPLG -- A2/A3 rendered-image validation")
+    print("=" * 70, flush=True)
+    sh([sys.executable, "scripts/handeye_splg_validation.py"])
+
     # candidate-4 was only verified on scene-0061; re-check with SPLG
     # specifically on the two scenes that dominate the pooling failures
     # (scene-0103, scene-0916) before trusting that their low ground-point
